@@ -1,6 +1,6 @@
 namespace ClinicQueue.Application.DTOs.Appointments;
 
-public class AppointmentResponse
+public class AppointmentDetailsResponse
 {
     public int Id { get; set; }
 

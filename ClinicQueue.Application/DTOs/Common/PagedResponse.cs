@@ -3,7 +3,7 @@ namespace ClinicQueue.Application.DTOs.Common;
 /// <summary>
 /// תשובה של רשימה מחולקת לעמודים - הפריטים של העמוד הנוכחי + נתונים לניווט.
 /// </summary>
-public class PagedResult<T>
+public class PagedResponse<T>
 {
     public IReadOnlyList<T> Items { get; set; } = new List<T>();
 
