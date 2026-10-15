@@ -17,9 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ClinicQueue.Core\ClinicQueue.Core.csproj" />
-    <ProjectReference Include="..\ClinicQueue.Data\ClinicQueue.Data.csproj" />
-    <ProjectReference Include="..\ClinicQueue.Service\ClinicQueue.Service.csproj" />
+    <ProjectReference Include="..\ClinicQueue.Application\ClinicQueue.Application.csproj" />
+    <ProjectReference Include="..\ClinicQueue.Infrastructure\ClinicQueue.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
