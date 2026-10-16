@@ -21,8 +21,13 @@ public class DoctorRepository : IDoctorRepository
     public Task<Doctor?> GetByIdAsync(int id, CancellationToken ct) =>
         _context.Doctors.Include(d => d.Specializations).FirstOrDefaultAsync(d => d.Id == id, ct);
 
+    public Task<bool> HasSlotsAsync(int id, CancellationToken ct) =>
+        _context.DoctorSlots.AnyAsync(s => s.DoctorId == id, ct);
+
     public async Task AddAsync(Doctor doctor, CancellationToken ct) =>
         await _context.Doctors.AddAsync(doctor, ct);
+
+    public void Remove(Doctor doctor) => _context.Doctors.Remove(doctor);
 
     // הקרנה לתוך ה-DB: שאילתה אחת עם התמחויות וספירת משבצות פנויות (בלי N+1)
     private IQueryable<DoctorDetailsResponse> DetailsQuery()

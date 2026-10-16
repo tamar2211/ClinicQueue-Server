@@ -1,5 +1,6 @@
 using AutoMapper;
 using ClinicQueue.Application.DTOs.Auth;
+using ClinicQueue.Application.DTOs.Doctors;
 using ClinicQueue.Domain.Entities;
 
 namespace ClinicQueue.Application.Mapping;
@@ -8,6 +9,8 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
+        CreateMap<Specialization, SpecializationDetailsResponse>();
+
         // האימייל, הסיסמה (hash) והתפקיד נקבעים ב-AuthService
         CreateMap<UserRegisterRequest, User>()
             .ForMember(u => u.Id, o => o.Ignore())

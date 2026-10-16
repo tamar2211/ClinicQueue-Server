@@ -10,5 +10,6 @@ public interface IAppointmentRepository
     Task<PagedResponse<AppointmentDetailsResponse>> GetByUserAsync(int userId, PaginationQuery query, CancellationToken ct);
     Task<PagedResponse<AppointmentDetailsResponse>> GetAllAsync(PaginationQuery query, CancellationToken ct);
     Task<bool> HasActiveAppointmentAtAsync(int userId, DateTime startUtc, DateTime endUtc, CancellationToken ct);
+    Task<bool> HasFutureActiveAppointmentsAsync(int doctorId, DateTime nowUtc, CancellationToken ct);
     Task AddAsync(Appointment appointment, CancellationToken ct);
 }

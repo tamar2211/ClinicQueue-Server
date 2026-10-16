@@ -14,10 +14,15 @@ public record ErrorResponse(
 public static class ResultExtensions
 {
     /// ממיר Result של ה-Service לסטטוס HTTP: הצלחה = 200, שגיאה לפי ErrorType.
-    public static ActionResult ToActionResult<T>(this Result<T> result, ControllerBase controller)
-    {
-        if (result.IsSuccess) return controller.Ok(result.Value);
+    public static ActionResult ToActionResult<T>(this Result<T> result, ControllerBase controller) =>
+        result.IsSuccess ? controller.Ok(result.Value) : ToError(result, controller);
 
+    /// בלי ערך מוחזר (עדכון/מחיקה): הצלחה = 204
+    public static ActionResult ToActionResult(this Result result, ControllerBase controller) =>
+        result.IsSuccess ? controller.NoContent() : ToError(result, controller);
+
+    private static ObjectResult ToError(Result result, ControllerBase controller)
+    {
         var status = result.ErrorType switch
         {
             ErrorType.Validation => StatusCodes.Status400BadRequest,

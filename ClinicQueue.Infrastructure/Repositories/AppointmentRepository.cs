@@ -30,6 +30,11 @@ public class AppointmentRepository : IAppointmentRepository
             && a.DoctorSlot.StartTimeUtc < endUtc
             && a.DoctorSlot.EndTimeUtc > startUtc, ct);
 
+    public Task<bool> HasFutureActiveAppointmentsAsync(int doctorId, DateTime nowUtc, CancellationToken ct) =>
+        _context.Appointments.AnyAsync(a => a.Status == AppointmentStatus.Active
+            && a.DoctorSlot.DoctorId == doctorId
+            && a.DoctorSlot.StartTimeUtc > nowUtc, ct);
+
     public async Task AddAsync(Appointment appointment, CancellationToken ct) =>
         await _context.Appointments.AddAsync(appointment, ct);
 
