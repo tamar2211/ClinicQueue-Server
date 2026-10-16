@@ -4,6 +4,7 @@ using ClinicQueue.Application.Interfaces;
 using ClinicQueue.Domain.Entities;
 using ClinicQueue.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace ClinicQueue.Infrastructure.Repositories;
 
@@ -12,6 +13,18 @@ public class SlotRepository : ISlotRepository
     private readonly AppDbContext _context;
 
     public SlotRepository(AppDbContext context) => _context = context;
+
+    // הקרנה אחת לשימוש בחיפוש ובשליפה לפי מזהה
+    private static readonly Expression<Func<DoctorSlot, DoctorSlotDetailsResponse>> ToDetails = s =>
+        new DoctorSlotDetailsResponse
+        {
+            Id = s.Id,
+            DoctorId = s.DoctorId,
+            DoctorName = s.Doctor.FullName,
+            StartTimeUtc = s.StartTimeUtc,
+            EndTimeUtc = s.EndTimeUtc,
+            IsBooked = s.IsBooked
+        };
 
     public async Task<PagedResponse<DoctorSlotDetailsResponse>> SearchAsync(
         SlotQueryParameters query, DateTime? fromUtc, DateTime? toUtc, CancellationToken ct)
@@ -37,15 +50,7 @@ public class SlotRepository : ISlotRepository
             .OrderBy(s => s.StartTimeUtc)
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
-            .Select(s => new DoctorSlotDetailsResponse
-            {
-                Id = s.Id,
-                DoctorId = s.DoctorId,
-                DoctorName = s.Doctor.FullName,
-                StartTimeUtc = s.StartTimeUtc,
-                EndTimeUtc = s.EndTimeUtc,
-                IsBooked = s.IsBooked
-            })
+            .Select(ToDetails)
             .ToListAsync(ct);
 
         return new PagedResponse<DoctorSlotDetailsResponse>
@@ -56,6 +61,9 @@ public class SlotRepository : ISlotRepository
             TotalCount = totalCount
         };
     }
+
+    public Task<DoctorSlotDetailsResponse?> GetDetailsByIdAsync(int id, CancellationToken ct) =>
+        _context.DoctorSlots.AsNoTracking().Where(s => s.Id == id).Select(ToDetails).FirstOrDefaultAsync(ct);
 
     public Task<DoctorSlot?> GetByIdAsync(int id, CancellationToken ct) =>
         _context.DoctorSlots.FirstOrDefaultAsync(s => s.Id == id, ct);
