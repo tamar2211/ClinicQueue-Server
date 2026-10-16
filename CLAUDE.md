@@ -41,15 +41,22 @@ xUnit ו-Moq על Services, כולל המשאב המוגבל (תקין ונדח�
 - שמות DTOs: קוראים כמו משפט. הישות עושה ← ישות קודם (UserRegisterRequest).
   עושים לישות ← פעולה קודם (CreateDoctorRequest). תצוגה ← XDetailsResponse.
 
-## מצב נוכחי
-- מבנה ישן: Core, Data, Service, API, Tests. הקוד משלבים 2-6 עוד לא התקמפל.
-- אושר מעבר ל-Clean Architecture: Domain ← Application ← Infrastructure, ו-API → Application + Infrastructure.
-  - Domain: Entities, Enums. בלי [ConcurrencyCheck], ההגדרה רק ב-Fluent API.
-  - Application: DTOs לפי נושא, Common/Results, Common/Exceptions, Interfaces, Services.
-  - Infrastructure: Persistence/AppDbContext, Repositories.
-- השלב הבא: Build ← Git ו-commit ← מעבר ← Build ← commit.
-- אחרי המעבר: לסיים שמות DTOs (SlotQueryParameters, Appointments, Common).
+## מצב נוכחי (16.10.2026) – כ-35% מהפרויקט
+- המעבר ל-Clean Architecture הושלם ו-commit בוצע (מקומי, בלי push; main מקדים את origin ב-2). הפרויקטים הישנים נמחקו.
+  מבנה: Domain ← Application ← Infrastructure, API → Application + Infrastructure, Tests. Build נקי.
+- שמות DTOs הושלמו: AppointmentDetailsResponse, PagedResponse (כל השאר נשארו).
+- Domain: Entities, Enums (בלי [ConcurrencyCheck]). Infrastructure: Persistence/AppDbContext (token ב-Fluent API).
+- הושלמו (commit): UnitOfWork, 5 Repositories, 2 migrations, DbSeeder, BCrypt (IPasswordHasher), DI ו-MigrateAsync+Seed ב-Program.cs.
+- DB: Docker, קונטיינר pg, ClinicQueueDb. connection string ב-User Secrets (הסיסמה לא מוכרת ל-Claude).
+- דמו: admin@clinic.com / patient@clinic.com, סיסמה Demo1234!
+- "לב הפרויקט" להסבר וב-README: docs/concurrency-notes.md.
+- פתוח: UnitOfWork יחליף גם DbUpdateException של האינדקס החלקי ל-409.
+- השלב הבא (לא אושר): Services + AutoMapper (גרסה בהחלטת הסטודנטית), מתחילים ב-AuthService (JWT).
+- אחר כך: Controllers, Middleware, NLog, בדיקות, README.
+- לקוח (לא נבדק): אחרי סיום השרת, עוברים יחד על המסכים כמפתח ומעצב, ואז Claude בונה לבד, בעיצוב מרשים. 4 מסכים חובה.
+- חור לטיפול ב-AppointmentService: שתי בקשות מקבילות של אותה מטופלת על משבצות חופפות עוקפות את ה-Version של המשבצת.
+- ב-Service: מטופלת מבטלת רק תור שלה (403), מנהל מבטל כל תור.
 
 ## שאלות פתוחות
-כמה שעות לפני תור מותר לבטל (הצעה: 24) · לחסום שני תורים באותה שעה למטופלת (הצעה: כן, 409) ·
-PostgreSQL דרך Docker או התקנה רגילה · כיתה: סמינר או שופרא.
+כמה שעות לפני תור מותר לבטל (הצעה: 24).
+נסגרו: PostgreSQL ב-Docker · שני תורים חופפים למטופלת – אסור (409). כיתה: סמינר.
