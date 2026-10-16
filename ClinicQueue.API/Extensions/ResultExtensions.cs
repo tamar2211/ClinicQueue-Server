@@ -1,9 +1,15 @@
 using ClinicQueue.Application.Common.Results;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Serialization;
 
 namespace ClinicQueue.API.Extensions;
 
-public record ErrorResponse(int Status, string Message);
+/// הפורמט האחיד לכל שגיאה. Errors מלא רק בשגיאות ולידציה (שדה ← הודעות)
+public record ErrorResponse(
+    int Status,
+    string Message,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    IDictionary<string, string[]>? Errors = null);
 
 public static class ResultExtensions
 {

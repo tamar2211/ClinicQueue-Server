@@ -1,3 +1,5 @@
+using ClinicQueue.API.Extensions;
+using ClinicQueue.API.Middleware;
 using ClinicQueue.Application.Interfaces;
 using ClinicQueue.Application.Mapping;
 using ClinicQueue.Application.Services;
@@ -5,6 +7,7 @@ using ClinicQueue.Infrastructure.Persistence;
 using ClinicQueue.Infrastructure.Repositories;
 using ClinicQueue.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -15,7 +18,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
+    // ולידציה (400) באותו פורמט של שאר השגיאות, עם פירוט לכל שדה
+    options.InvalidModelStateResponseFactory = context => new BadRequestObjectResult(new ErrorResponse(
+        StatusCodes.Status400BadRequest,
+        "הבקשה אינה תקינה",
+        context.ModelState.Where(e => e.Value!.Errors.Count > 0).ToDictionary(
+            e => e.Key, e => e.Value!.Errors.Select(x => x.ErrorMessage).ToArray()))));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -77,6 +86,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<CorrelationIdMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
