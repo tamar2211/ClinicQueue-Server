@@ -41,18 +41,19 @@ xUnit ו-Moq על Services, כולל המשאב המוגבל (תקין ונדח�
 - שמות DTOs: קוראים כמו משפט. הישות עושה ← ישות קודם (UserRegisterRequest).
   עושים לישות ← פעולה קודם (CreateDoctorRequest). תצוגה ← XDetailsResponse.
 
-## מצב נוכחי (16.10.2026) – כ-35% מהפרויקט
+## מצב נוכחי (16.10.2026) – כ-75% מהפרויקט (השרת)
 - המעבר ל-Clean Architecture הושלם ו-commit בוצע (מקומי, בלי push; main מקדים את origin ב-2). הפרויקטים הישנים נמחקו.
   מבנה: Domain ← Application ← Infrastructure, API → Application + Infrastructure, Tests. Build נקי.
 - שמות DTOs הושלמו: AppointmentDetailsResponse, PagedResponse (כל השאר נשארו).
 - Domain: Entities, Enums (בלי [ConcurrencyCheck]). Infrastructure: Persistence/AppDbContext (token ב-Fluent API).
-- הושלמו (commit): UnitOfWork, 5 Repositories, 2 migrations, DbSeeder, BCrypt (IPasswordHasher), DI ו-MigrateAsync+Seed ב-Program.cs.
+- הושלמו (commit): UnitOfWork, 5 Repositories, 3 migrations (האחרונה: Version על User), DbSeeder, BCrypt, DI, MigrateAsync+Seed.
+- שרת גמור חוץ מ-README: Auth (JWT), Doctors, Specializations, Slots, Appointments (Version על משבצת ועל משתמשת), middleware, NLog (הלוגים: Claude מחליט לבד).
+- בדיקות: 31 עוברות (Moq על Services + ConcurrencyTests עם שני DbContext על SQLite). AutoMapper 13.0.1 (אזהרת פגיעות ידועה, להזכיר ב-README).
+- דמו: אין צורך ב-Docker של בדיקות; הרצת השרת עושה Migrate+Seed. חלון ביטול: 24 שעות.
 - DB: Docker, קונטיינר pg, ClinicQueueDb. connection string ב-User Secrets (הסיסמה לא מוכרת ל-Claude).
 - דמו: admin@clinic.com / patient@clinic.com, סיסמה Demo1234!
 - "לב הפרויקט" להסבר וב-README: docs/concurrency-notes.md.
-- פתוח: UnitOfWork יחליף גם DbUpdateException של האינדקס החלקי ל-409.
-- השלב הבא (לא אושר): Services + AutoMapper (גרסה בהחלטת הסטודנטית), מתחילים ב-AuthService (JWT).
-- אחר כך: Controllers, Middleware, NLog, בדיקות, README.
+- השלב הבא: README (המשאב המוגבל מ-docs/concurrency-notes.md, הרצה מקומית, משתמשי דמו), אחר כך לקוח React והעלאה ל-Render.
 - לקוח (לא נבדק): אחרי סיום השרת, עוברים יחד על המסכים כמפתח ומעצב, ואז Claude בונה לבד, בעיצוב מרשים. 4 מסכים חובה.
 - חור לטיפול ב-AppointmentService: שתי בקשות מקבילות של אותה מטופלת על משבצות חופפות עוקפות את ה-Version של המשבצת.
 - ב-Service: מטופלת מבטלת רק תור שלה (403), מנהל מבטל כל תור.

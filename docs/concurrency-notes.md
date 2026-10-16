@@ -12,12 +12,21 @@
    ה-Service מחזיר `Result.Conflict`, ה-Controller מחזיר **409**, ו-NLog רושם **Warning**.
    למה החריגה שלנו: ה-Service לא צריך להכיר את EF ← שכבות נקיות.
 3. **אינדקס ייחודי חלקי ב-DB** (migration `UniqueActiveAppointmentPerSlot`) – `UNIQUE (DoctorSlotId) WHERE Status = 'Active'`.
-   גם אם ה-Version נעקף, ה-DB עצמו מונע שני תורים פעילים על משבצת. הפרת האינדקס ← `DbUpdateException` ← גם היא מומרת ל-409 (לטפל ב-UnitOfWork).
+   גם אם ה-Version נעקף, ה-DB עצמו מונע שני תורים פעילים על משבצת. הפרת האינדקס ← `DbUpdateException` (Postgres 23505) ← `UnitOfWork` ממיר גם אותה ל-`ConcurrencyConflictException` ← 409.
    ביטול תור = שינוי Status, לכן התור המבוטל יוצא מהאינדקס והמשבצת מתפנה.
 
-## החור שהשתיים הראשונות לא סוגרות
-שתי בקשות מקבילות של **אותה מטופלת** על **משבצות חופפות** של רופאים שונים: כל משבצת מעודכנת בנפרד ← ה-Version של כל אחת תקין ← שתיהן עוברות.
-טיפול (ב-`AppointmentService`): `HasActiveAppointmentAtAsync` לפני השמירה (409 למקרה הרגיל). המקרה המקבילי באמת – להחליט בהמשך (אינדקס/טרנזקציה).
+## החור של אותה מטופלת, וסגירתו (Version גם על User)
+שתי בקשות מקבילות של **אותה מטופלת** על **משבצות חופפות** של רופאים שונים: כל משבצת מעודכנת בנפרד ← ה-Version של כל אחת תקין ← שתיהן היו עוברות.
+הפתרון: ל-`User` יש גם `Version` (concurrency token). כל קביעת תור "נוגעת" בשורת המשתמשת (`IUserRepository.Touch`), ולכן שתי קביעות מקבילות של אותה מטופלת מתנגשות על שורת המשתמשת ← 409.
+הבדיקה הרגילה `HasActiveAppointmentAtAsync` נשארת למקרה הרגיל (לא מקבילי), ומחזירה הודעה ברורה.
+זו אותה טכניקה (optimistic) שהמורה דורשת, ללא תלות בהרחבות של PostgreSQL.
+
+## הבדיקות שמוכיחות את זה (`ClinicQueue.Tests/ConcurrencyTests.cs`, SQLite בזיכרון)
+- שני DbContext על אותה משבצת: הראשון נשמר, השני `DbUpdateConcurrencyException`.
+- `UnitOfWork` ממיר ל-`ConcurrencyConflictException`.
+- אותה מטופלת, שתי משבצות שונות: השני נדחה (Version של User).
+- שני תורים פעילים על משבצת אחת: האינדקס החלקי דוחה; תור מבוטל לא חוסם.
+- אימות שהבדיקות אמיתיות: ביטול זמני של `IsConcurrencyToken` על המשבצת גרם לכישלון שתי הבדיקות הראשונות.
 
 ## מה להסביר בעל פה
 - למה optimistic ולא pessimistic: בלי נעילות והמתנות, ההתנגשות נדירה, והמחיר רק שימוש חוזר בבקשה.

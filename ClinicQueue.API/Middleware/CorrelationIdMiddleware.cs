@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace ClinicQueue.API.Middleware;
 
 /// <summary>
@@ -28,7 +30,10 @@ public class CorrelationIdMiddleware
         {
             // רק method ו-path: בלי query string ובלי body (עלולים להכיל סיסמאות או tokens)
             _logger.LogInformation("{Method} {Path}", context.Request.Method, context.Request.Path);
+            var stopwatch = Stopwatch.StartNew();
             await _next(context);
+            _logger.LogInformation("{Method} {Path} ← {StatusCode} ({ElapsedMs} ms)",
+                context.Request.Method, context.Request.Path, context.Response.StatusCode, stopwatch.ElapsedMilliseconds);
         }
     }
 }

@@ -16,6 +16,7 @@ public class MappingProfile : Profile
             .ForMember(u => u.Id, o => o.Ignore())
             .ForMember(u => u.PasswordHash, o => o.Ignore())
             .ForMember(u => u.Role, o => o.Ignore())
+            .ForMember(u => u.Version, o => o.Ignore())
             .ForMember(u => u.CreatedAtUtc, o => o.Ignore())
             .ForMember(u => u.Appointments, o => o.Ignore());
     }
