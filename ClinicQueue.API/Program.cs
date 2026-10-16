@@ -12,9 +12,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using NLog.Web;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// NLog מתחבר מתחת ל-ILogger הרגיל: הקוד ממשיך להשתמש ב-ILogger, והכתיבה לקובץ מוגדרת ב-nlog.config
+builder.Logging.ClearProviders();
+builder.Host.UseNLog();
 
 // Add services to the container.
 

@@ -80,6 +80,7 @@ public class AppointmentService : IAppointmentService
             return Result<AppointmentDetailsResponse>.Conflict(BookingConflict);
         }
 
+        _logger.LogInformation("תור {AppointmentId} נקבע: משבצת {SlotId}, משתמשת {UserId}", appointment.Id, slot.Id, userId);
         return Result<AppointmentDetailsResponse>.Success((await _appointments.GetDetailsByIdAsync(appointment.Id, ct))!);
     }
 
@@ -134,6 +135,7 @@ public class AppointmentService : IAppointmentService
             return Result.Conflict(CancelConflict);
         }
 
+        _logger.LogInformation("תור {AppointmentId} בוטל ({Status})", id, appointment.Status);
         return Result.Success();
     }
 }
