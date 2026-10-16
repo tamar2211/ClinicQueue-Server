@@ -14,6 +14,11 @@ public class UserRepository : IUserRepository
     public Task<User?> GetByEmailAsync(string email, CancellationToken ct) =>
         _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email, ct);
 
+    public Task<User?> GetByIdAsync(int id, CancellationToken ct) =>
+        _context.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
+
+    public void Touch(User user) => _context.Entry(user).Property(u => u.Version).IsModified = true;
+
     public Task<bool> EmailExistsAsync(string email, CancellationToken ct) =>
         _context.Users.AnyAsync(u => u.Email == email, ct);
 

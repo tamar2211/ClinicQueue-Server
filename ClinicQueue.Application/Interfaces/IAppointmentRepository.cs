@@ -7,6 +7,7 @@ namespace ClinicQueue.Application.Interfaces;
 public interface IAppointmentRepository
 {
     Task<Appointment?> GetByIdAsync(int id, CancellationToken ct);
+    Task<AppointmentDetailsResponse?> GetDetailsByIdAsync(int id, CancellationToken ct);
     Task<PagedResponse<AppointmentDetailsResponse>> GetByUserAsync(int userId, PaginationQuery query, CancellationToken ct);
     Task<PagedResponse<AppointmentDetailsResponse>> GetAllAsync(PaginationQuery query, CancellationToken ct);
     Task<bool> HasActiveAppointmentAtAsync(int userId, DateTime startUtc, DateTime endUtc, CancellationToken ct);

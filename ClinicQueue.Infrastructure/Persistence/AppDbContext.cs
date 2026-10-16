@@ -34,6 +34,8 @@ public class AppDbContext : DbContext
 
             // אימייל ייחודי - אי אפשר להירשם פעמיים עם אותו אימייל
             e.HasIndex(u => u.Email).IsUnique();
+
+            e.Property(u => u.Version).IsConcurrencyToken();
         });
 
         // ---------- Specialization ----------
@@ -125,31 +127,29 @@ public class AppDbContext : DbContext
     }
 
     /// <summary>
-    /// לפני כל שמירה: כל משבצת שהשתנתה מקבלת Version חדש.
+    /// לפני כל שמירה: כל משבצת או משתמשת שהשתנו מקבלות Version חדש.
     /// EF שולח את ה-Version הישן בתנאי ה-WHERE ואת החדש ב-SET,
     /// כך שעדכון שמבוסס על נתון ישן לא ימצא שורה - ו-EF יזרוק DbUpdateConcurrencyException.
     /// הדריסה כאן חוסכת את הצורך לזכור לעשות את זה בכל Service.
     /// </summary>
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        RenewSlotVersions();
+        RenewVersions();
         return base.SaveChangesAsync(cancellationToken);
     }
 
     public override int SaveChanges()
     {
-        RenewSlotVersions();
+        RenewVersions();
         return base.SaveChanges();
     }
 
-    private void RenewSlotVersions()
+    private void RenewVersions()
     {
-        foreach (var entry in ChangeTracker.Entries<DoctorSlot>())
+        foreach (var entry in ChangeTracker.Entries().Where(e => e.State == EntityState.Modified))
         {
-            if (entry.State == EntityState.Modified)
-            {
-                entry.Entity.Version = Guid.NewGuid();
-            }
+            if (entry.Entity is DoctorSlot slot) slot.Version = Guid.NewGuid();
+            else if (entry.Entity is User user) user.Version = Guid.NewGuid();
         }
     }
 }

@@ -5,6 +5,7 @@ using ClinicQueue.Domain.Entities;
 using ClinicQueue.Domain.Enums;
 using ClinicQueue.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace ClinicQueue.Infrastructure.Repositories;
 
@@ -14,8 +15,27 @@ public class AppointmentRepository : IAppointmentRepository
 
     public AppointmentRepository(AppDbContext context) => _context = context;
 
+    // הקרנה אחת לרשימות ולשליפה לפי מזהה
+    private static readonly Expression<Func<Appointment, AppointmentDetailsResponse>> ToDetails = a =>
+        new AppointmentDetailsResponse
+        {
+            Id = a.Id,
+            SlotId = a.DoctorSlotId,
+            DoctorId = a.DoctorSlot.DoctorId,
+            DoctorName = a.DoctorSlot.Doctor.FullName,
+            PatientName = a.User.FullName,
+            StartTimeUtc = a.DoctorSlot.StartTimeUtc,
+            EndTimeUtc = a.DoctorSlot.EndTimeUtc,
+            Status = a.Status.ToString(),
+            CreatedAtUtc = a.CreatedAtUtc,
+            CancelledAtUtc = a.CancelledAtUtc
+        };
+
     public Task<Appointment?> GetByIdAsync(int id, CancellationToken ct) =>
         _context.Appointments.Include(a => a.DoctorSlot).FirstOrDefaultAsync(a => a.Id == id, ct);
+
+    public Task<AppointmentDetailsResponse?> GetDetailsByIdAsync(int id, CancellationToken ct) =>
+        _context.Appointments.AsNoTracking().Where(a => a.Id == id).Select(ToDetails).FirstOrDefaultAsync(ct);
 
     public Task<PagedResponse<AppointmentDetailsResponse>> GetByUserAsync(
         int userId, PaginationQuery query, CancellationToken ct) =>
@@ -47,19 +67,7 @@ public class AppointmentRepository : IAppointmentRepository
             .OrderByDescending(a => a.CreatedAtUtc)
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
-            .Select(a => new AppointmentDetailsResponse
-            {
-                Id = a.Id,
-                SlotId = a.DoctorSlotId,
-                DoctorId = a.DoctorSlot.DoctorId,
-                DoctorName = a.DoctorSlot.Doctor.FullName,
-                PatientName = a.User.FullName,
-                StartTimeUtc = a.DoctorSlot.StartTimeUtc,
-                EndTimeUtc = a.DoctorSlot.EndTimeUtc,
-                Status = a.Status.ToString(),
-                CreatedAtUtc = a.CreatedAtUtc,
-                CancelledAtUtc = a.CancelledAtUtc
-            })
+            .Select(ToDetails)
             .ToListAsync(ct);
 
         return new PagedResponse<AppointmentDetailsResponse>

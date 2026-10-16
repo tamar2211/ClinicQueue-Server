@@ -23,6 +23,10 @@ public class User
 
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
+    // Concurrency token של המשתמשת: קביעת תור "נוגעת" בשורה הזו, כך ששתי קביעות מקבילות
+    // של אותה מטופלת (גם על משבצות שונות וחופפות) מתנגשות זו בזו. ההגדרה ב-Fluent API.
+    public Guid Version { get; set; } = Guid.NewGuid();
+
     // one-to-many: למשתמש יכולים להיות הרבה תורים
     public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
 }
