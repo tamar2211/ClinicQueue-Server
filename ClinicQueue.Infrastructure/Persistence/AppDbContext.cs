@@ -103,6 +103,11 @@ public class AppDbContext : DbContext
              .OnDelete(DeleteBehavior.Restrict);
 
             e.HasIndex(a => new { a.UserId, a.Status });
+
+            // רשת ביטחון שנייה לתחרות: לכל היותר תור פעיל אחד למשבצת, גם אם ה-Version נעקף
+            e.HasIndex(a => a.DoctorSlotId)
+             .IsUnique()
+             .HasFilter("\"Status\" = 'Active'");
         });
 
         // ---------- Seed: נתונים קבועים ----------
