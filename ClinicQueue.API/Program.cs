@@ -69,6 +69,14 @@ builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddScoped<DbSeeder>();
 
+// CORS: רק הכתובות של הלקוח (ב-Render מוגדרות במשתנה סביבה Cors__AllowedOrigins__0).
+// ה-JWT נשלח ב-header ולא ב-cookie, ולכן אין צורך ב-credentials
+builder.Services.AddCors(options => options.AddPolicy("Client", policy => policy
+    .WithOrigins(builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [])
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .WithExposedHeaders(CorrelationIdMiddleware.HeaderName)));
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
 // הגדרות האימות נטענות מ-JwtSettings בזמן הבקשה הראשונה (לא בעליית השרת)
 builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
@@ -105,6 +113,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("Client");
 app.UseAuthentication();
 app.UseAuthorization();
 
