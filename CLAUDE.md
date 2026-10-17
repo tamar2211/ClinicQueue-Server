@@ -42,22 +42,25 @@ xUnit ו-Moq על Services, כולל המשאב המוגבל (תקין ונדח�
   עושים לישות ← פעולה קודם (CreateDoctorRequest). תצוגה ← XDetailsResponse.
 
 ## מצב נוכחי (16.10.2026) – כ-75% מהפרויקט (השרת)
-- המעבר ל-Clean Architecture הושלם ו-commit בוצע (מקומי, בלי push; main מקדים את origin ב-2). הפרויקטים הישנים נמחקו.
-  מבנה: Domain ← Application ← Infrastructure, API → Application + Infrastructure, Tests. Build נקי.
-- שמות DTOs הושלמו: AppointmentDetailsResponse, PagedResponse (כל השאר נשארו).
-- Domain: Entities, Enums (בלי [ConcurrencyCheck]). Infrastructure: Persistence/AppDbContext (token ב-Fluent API).
-- הושלמו (commit): UnitOfWork, 5 Repositories, 3 migrations (האחרונה: Version על User), DbSeeder, BCrypt, DI, MigrateAsync+Seed.
-- שרת גמור חוץ מ-README: Auth (JWT), Doctors, Specializations, Slots, Appointments (Version על משבצת ועל משתמשת), middleware, NLog (הלוגים: Claude מחליט לבד).
-- בדיקות: 31 עוברות (Moq על Services + ConcurrencyTests עם שני DbContext על SQLite). AutoMapper 13.0.1 (אזהרת פגיעות ידועה, להזכיר ב-README).
-- דמו: אין צורך ב-Docker של בדיקות; הרצת השרת עושה Migrate+Seed. חלון ביטול: 24 שעות.
-- DB: Docker, קונטיינר pg, ClinicQueueDb. connection string ב-User Secrets (הסיסמה לא מוכרת ל-Claude).
-- דמו: admin@clinic.com / patient@clinic.com, סיסמה Demo1234!
-- "לב הפרויקט" להסבר וב-README: docs/concurrency-notes.md.
-- השלב הבא: README (המשאב המוגבל מ-docs/concurrency-notes.md, הרצה מקומית, משתמשי דמו), אחר כך לקוח React והעלאה ל-Render.
-- לקוח (לא נבדק): אחרי סיום השרת, עוברים יחד על המסכים כמפתח ומעצב, ואז Claude בונה לבד, בעיצוב מרשים. 4 מסכים חובה.
-- חור לטיפול ב-AppointmentService: שתי בקשות מקבילות של אותה מטופלת על משבצות חופפות עוקפות את ה-Version של המשבצת.
-- ב-Service: מטופלת מבטלת רק תור שלה (403), מנהל מבטל כל תור.
+**השרת גמור ונבדק** (commit אחרון בקוד: 0b60a72; אחריו נוספו docs/project-summary.md ו-.html). Build נקי, 31 בדיקות עוברות.
+- מבנה: Domain ← Application ← Infrastructure, API → Application + Infrastructure, Tests. הכול מקומי, **עוד אין push** ואין repository ב-GitHub.
+- בשרת: Auth (JWT+BCrypt), Doctors (CRUD, DELETE רק בלי משבצות), Specializations, Slots, Appointments, middleware (שגיאות+CorrelationId),
+  NLog, CORS (Cors:AllowedOrigins, ברירת מחדל http://localhost:5173), 3 migrations, DbSeeder, MigrateAsync בעליית השרת.
+- תחרות: Version על DoctorSlot **ועל User** (סוגר את החור של אותה מטופלת), אינדקס חלקי לתור פעיל אחד למשבצת, UnitOfWork ממיר גם 23505. ביטול ב-DELETE (משנה סטטוס), חלון 24 שעות (מנהלת פטורה).
+- הסבר מלא ללימוד ולבודק: docs/project-summary.md (+ .html). חומר ל-README: docs/concurrency-notes.md.
+- DB: Docker, קונטיינר pg (`docker start pg` אם כבוי), DB ClinicQueueDb. connection string ו-Jwt:Key ב-User Secrets (**הסיסמה לא מוכרת ל-Claude**, לא להדפיס סודות).
+  לפקודות עם סיסמה: חלון PowerShell של הסטודנטית, לא `!`. הדבקת עברית בטרמינל מתהפכת, לכן לא `cd` עם נתיב בעברית (`cd D:\Users\User\Desktop\*\.NetProject\ClinicQueue`).
+- דמו: admin@clinic.com / patient@clinic.com, סיסמה Demo1234!. dotnet-ef מותקן גלובלית. הרצה: `dotnet run --project ClinicQueue.API` (http://localhost:5207/swagger).
+- AutoMapper 13.0.1: אזהרת פגיעות ידועה (תוקן ב-15.1.1+ שדורש license key). הוחלט להישאר ולהזכיר ב-README.
+- בדיקות ה-DbContext על SQLite בזיכרון (לא Postgres). לציין ב-README.
+- לוגים: Claude מחליט לבד (זיכרון logging-autonomy). שאר הדברים: עדיין צעד-צעד עם אישור, commit רק באישור.
+
+## השלבים הבאים (בסדר הזה)
+1. **לקוח React, 6 מסכים (אושר):** התחברות/הרשמה (כפתורי כניסה מהירה לדמו), רשימת משבצות עם סינון ו-pagination, קביעת תור,
+   הודעת 409 ברורה, "התורים שלי" (עם ביטול), מצב מנהלת (כל התורים, יצירת משבצת, ניהול רופאים). עיצוב נקי ומודרני, RTL.
+   הלקוח לא נבדק בציון, אבל הבודק משתמש בו לבדוק את המערכת. Claude בונה לבד (זיכרון client-not-graded). repository נפרד.
+2. העלאה ל-Render (שרת + לקוח + PostgreSQL בענן, משתני סביבה כולל Cors__AllowedOrigins__0) ושני repositories ב-GitHub. לפני push: לוודא שאין סודות בהיסטוריה. push רק באישור.
+3. README אחרון (פסקה, המשאב המוגבל, הרצה מקומית עם Docker, משתמשי דמו, כתובות חיות) ובדיקה אחרונה מול docs/teacher-requirements.md.
 
 ## שאלות פתוחות
-כמה שעות לפני תור מותר לבטל (הצעה: 24).
-נסגרו: PostgreSQL ב-Docker · שני תורים חופפים למטופלת – אסור (409). כיתה: סמינר.
+אין. נסגרו: חלון ביטול 24 ש' · PostgreSQL ב-Docker · שני תורים חופפים למטופלת – 409 · כיתה: סמינר · 6 מסכים.
