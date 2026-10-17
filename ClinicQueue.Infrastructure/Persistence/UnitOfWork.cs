@@ -7,7 +7,7 @@ namespace ClinicQueue.Infrastructure.Persistence;
 
 public class UnitOfWork : IUnitOfWork
 {
-    private const string ConflictMessage = "הפעולה התנגשה עם פעולה אחרת שהתבצעה באותו זמן. נסי שוב.";
+    private const string ConflictMessage = "הפעולה התנגשה עם פעולה אחרת שהתבצעה באותו זמן. נסה שוב.";
 
     private readonly AppDbContext _context;
 

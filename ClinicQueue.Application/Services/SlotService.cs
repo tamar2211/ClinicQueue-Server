@@ -41,7 +41,7 @@ public class SlotService : ISlotService
     {
         var slot = await _slots.GetDetailsByIdAsync(id, ct);
         return slot is null
-            ? Result<DoctorSlotDetailsResponse>.NotFound("המשבצת לא נמצאה")
+            ? Result<DoctorSlotDetailsResponse>.NotFound("התור הפנוי לא נמצא")
             : Result<DoctorSlotDetailsResponse>.Success(slot);
     }
 
@@ -53,16 +53,16 @@ public class SlotService : ISlotService
         if (end <= start)
             return Result<DoctorSlotDetailsResponse>.Validation("שעת הסיום חייבת להיות אחרי שעת ההתחלה");
         if (start <= DateTime.UtcNow)
-            return Result<DoctorSlotDetailsResponse>.Validation("אפשר ליצור משבצת רק בזמן עתידי");
+            return Result<DoctorSlotDetailsResponse>.Validation("אפשר ליצור תור פנוי רק בזמן עתידי");
 
         var doctor = await _doctors.GetDetailsByIdAsync(request.DoctorId, ct);
         if (doctor is null)
             return Result<DoctorSlotDetailsResponse>.NotFound("הרופא לא נמצא");
         if (!doctor.IsActive)
-            return Result<DoctorSlotDetailsResponse>.Validation("אי אפשר ליצור משבצת לרופא שאינו פעיל");
+            return Result<DoctorSlotDetailsResponse>.Validation("אי אפשר ליצור תור פנוי לרופא שאינו פעיל");
 
         if (await _slots.HasOverlapAsync(request.DoctorId, start, end, ct))
-            return Result<DoctorSlotDetailsResponse>.Conflict("קיימת משבצת חופפת אצל הרופא בזמן הזה");
+            return Result<DoctorSlotDetailsResponse>.Conflict("קיים תור פנוי חופף אצל הרופא בזמן הזה");
 
         var slot = new DoctorSlot { DoctorId = request.DoctorId, StartTimeUtc = start, EndTimeUtc = end };
         await _slots.AddAsync(slot, ct);
@@ -74,8 +74,8 @@ public class SlotService : ISlotService
     public async Task<Result> DeleteAsync(int id, CancellationToken ct)
     {
         var slot = await _slots.GetByIdAsync(id, ct);
-        if (slot is null) return Result.NotFound("המשבצת לא נמצאה");
-        if (slot.IsBooked) return Result.Conflict("אי אפשר למחוק משבצת שנתפסה");
+        if (slot is null) return Result.NotFound("התור הפנוי לא נמצא");
+        if (slot.IsBooked) return Result.Conflict("אי אפשר למחוק תור שנתפס");
 
         _slots.Remove(slot);
         await _unitOfWork.SaveChangesAsync(ct);

@@ -65,7 +65,12 @@ public class AppDbContext : DbContext
                          new { DoctorId = 1, SpecializationId = 1 },
                          new { DoctorId = 1, SpecializationId = 2 },
                          new { DoctorId = 2, SpecializationId = 2 },
-                         new { DoctorId = 3, SpecializationId = 3 });
+                         new { DoctorId = 3, SpecializationId = 3 },
+                         new { DoctorId = 4, SpecializationId = 4 },
+                         new { DoctorId = 5, SpecializationId = 5 },
+                         new { DoctorId = 6, SpecializationId = 6 },
+                         new { DoctorId = 7, SpecializationId = 7 },
+                         new { DoctorId = 8, SpecializationId = 8 });
                  });
         });
 
@@ -118,12 +123,22 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Specialization>().HasData(
             new Specialization { Id = 1, Name = "רפואת משפחה" },
             new Specialization { Id = 2, Name = "רפואת ילדים" },
-            new Specialization { Id = 3, Name = "רפואת עיניים" });
+            new Specialization { Id = 3, Name = "רפואת עיניים" },
+            new Specialization { Id = 4, Name = "רפואת עור" },
+            new Specialization { Id = 5, Name = "אורתופדיה" },
+            new Specialization { Id = 6, Name = "קרדיולוגיה" },
+            new Specialization { Id = 7, Name = "אף אוזן גרון" },
+            new Specialization { Id = 8, Name = "רפואת שיניים" });
 
         modelBuilder.Entity<Doctor>().HasData(
             new Doctor { Id = 1, FullName = "ד\"ר משה כהן", IsActive = true },
             new Doctor { Id = 2, FullName = "ד\"ר יעקב לוי", IsActive = true },
-            new Doctor { Id = 3, FullName = "ד\"ר אברהם פרידמן", IsActive = true });
+            new Doctor { Id = 3, FullName = "ד\"ר אברהם פרידמן", IsActive = true },
+            new Doctor { Id = 4, FullName = "ד\"ר רונית שמש", IsActive = true },
+            new Doctor { Id = 5, FullName = "ד\"ר אורי בן דוד", IsActive = true },
+            new Doctor { Id = 6, FullName = "ד\"ר נועה גולן", IsActive = true },
+            new Doctor { Id = 7, FullName = "ד\"ר איתן מזרחי", IsActive = true },
+            new Doctor { Id = 8, FullName = "ד\"ר תמר ברק", IsActive = true });
     }
 
     /// <summary>

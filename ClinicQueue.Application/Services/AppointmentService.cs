@@ -19,9 +19,9 @@ public class AppointmentService : IAppointmentService
     private const int MinHoursBeforeCancel = 24;
 
     private const string BookingConflict =
-        "לא ניתן היה להשלים את קביעת התור: המשבצת נתפסה על ידי מטופלת אחרת, או שבקשה נוספת שלך מתבצעת כרגע. נסי שוב.";
+        "לא ניתן היה להשלים את קביעת התור: התור נתפס על ידי מטופל אחר, או שבקשה נוספת שלך מתבצעת כרגע. נסה שוב.";
 
-    private const string CancelConflict = "לא ניתן היה לבטל את התור כי המצב שלו השתנה בינתיים. נסי שוב.";
+    private const string CancelConflict = "לא ניתן היה לבטל את התור כי המצב שלו השתנה בינתיים. נסה שוב.";
 
     private readonly IAppointmentRepository _appointments;
     private readonly ISlotRepository _slots;
@@ -46,11 +46,11 @@ public class AppointmentService : IAppointmentService
     {
         var slot = await _slots.GetByIdAsync(request.SlotId, ct);
         if (slot is null)
-            return Result<AppointmentDetailsResponse>.NotFound("המשבצת לא נמצאה");
+            return Result<AppointmentDetailsResponse>.NotFound("התור הפנוי לא נמצא");
         if (slot.IsBooked)
-            return Result<AppointmentDetailsResponse>.Conflict("המשבצת כבר תפוסה");
+            return Result<AppointmentDetailsResponse>.Conflict("התור כבר נתפס");
         if (slot.StartTimeUtc <= DateTime.UtcNow)
-            return Result<AppointmentDetailsResponse>.Validation("אי אפשר לקבוע תור למשבצת שהזמן שלה עבר");
+            return Result<AppointmentDetailsResponse>.Validation("אי אפשר לקבוע תור שהזמן שלו עבר");
 
         var doctor = await _doctors.GetDetailsByIdAsync(slot.DoctorId, ct);
         if (doctor is not { IsActive: true })

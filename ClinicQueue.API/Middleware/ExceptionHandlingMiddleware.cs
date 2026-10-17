@@ -38,7 +38,7 @@ public class ExceptionHandlingMiddleware
             using (BeginCorrelationScope(context))
                 _logger.LogError(ex, "חריגה לא צפויה");
             await WriteAsync(context, StatusCodes.Status500InternalServerError,
-                "אירעה שגיאה בלתי צפויה. נסי שוב מאוחר יותר.");
+                "אירעה שגיאה בלתי צפויה. נסה שוב מאוחר יותר.");
         }
     }
 

@@ -96,6 +96,36 @@ namespace ClinicQueue.Infrastructure.Migrations
                             Id = 3,
                             FullName = "ד\"ר אברהם פרידמן",
                             IsActive = true
+                        },
+                        new
+                        {
+                            Id = 4,
+                            FullName = "ד\"ר רונית שמש",
+                            IsActive = true
+                        },
+                        new
+                        {
+                            Id = 5,
+                            FullName = "ד\"ר אורי בן דוד",
+                            IsActive = true
+                        },
+                        new
+                        {
+                            Id = 6,
+                            FullName = "ד\"ר נועה גולן",
+                            IsActive = true
+                        },
+                        new
+                        {
+                            Id = 7,
+                            FullName = "ד\"ר איתן מזרחי",
+                            IsActive = true
+                        },
+                        new
+                        {
+                            Id = 8,
+                            FullName = "ד\"ר תמר ברק",
+                            IsActive = true
                         });
                 });
 
@@ -165,6 +195,31 @@ namespace ClinicQueue.Infrastructure.Migrations
                         {
                             Id = 3,
                             Name = "רפואת עיניים"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "רפואת עור"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "אורתופדיה"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "קרדיולוגיה"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "אף אוזן גרון"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "רפואת שיניים"
                         });
                 });
 
@@ -249,6 +304,31 @@ namespace ClinicQueue.Infrastructure.Migrations
                         {
                             DoctorId = 3,
                             SpecializationId = 3
+                        },
+                        new
+                        {
+                            DoctorId = 4,
+                            SpecializationId = 4
+                        },
+                        new
+                        {
+                            DoctorId = 5,
+                            SpecializationId = 5
+                        },
+                        new
+                        {
+                            DoctorId = 6,
+                            SpecializationId = 6
+                        },
+                        new
+                        {
+                            DoctorId = 7,
+                            SpecializationId = 7
+                        },
+                        new
+                        {
+                            DoctorId = 8,
+                            SpecializationId = 8
                         });
                 });
 

@@ -75,7 +75,7 @@ public class DoctorService : IDoctorService
         if (doctor is null) return Result.NotFound("הרופא לא נמצא");
 
         if (await _doctors.HasSlotsAsync(id, ct))
-            return Result.Conflict("אי אפשר למחוק רופא שיש לו משבצות זמן. אפשר להשבית אותו במקום.");
+            return Result.Conflict("אי אפשר למחוק רופא שיש לו תורים פנויים או תפוסים. אפשר להשבית אותו במקום.");
 
         _doctors.Remove(doctor);
         await _unitOfWork.SaveChangesAsync(ct);

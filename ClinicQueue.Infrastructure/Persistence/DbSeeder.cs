@@ -41,12 +41,15 @@ public class DbSeeder
         });
     }
 
-    // רק אם אין עדיין משבצות: ימי חול הקרובים, חצי שעה כל אחת (UTC)
+    // רק לרופאים שאין להם עדיין משבצות: ימי חול הקרובים, חצי שעה כל אחת (UTC)
     private async Task SeedSlotsAsync(CancellationToken ct)
     {
-        if (await _context.DoctorSlots.AnyAsync(ct)) return;
+        var doctorIds = await _context.Doctors
+            .Where(d => !d.Slots.Any())
+            .Select(d => d.Id)
+            .ToListAsync(ct);
+        if (doctorIds.Count == 0) return;
 
-        var doctorIds = await _context.Doctors.Select(d => d.Id).ToListAsync(ct);
         var firstDay = DateTime.UtcNow.Date.AddDays(1);
 
         for (var day = 0; day < 7; day++)

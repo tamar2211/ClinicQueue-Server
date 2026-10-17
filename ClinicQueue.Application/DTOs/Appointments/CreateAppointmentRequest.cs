@@ -8,6 +8,6 @@ namespace ClinicQueue.Application.DTOs.Appointments;
 /// </summary>
 public class CreateAppointmentRequest
 {
-    [Range(1, int.MaxValue, ErrorMessage = "יש לבחור משבצת")]
+    [Range(1, int.MaxValue, ErrorMessage = "יש לבחור תור")]
     public int SlotId { get; set; }
 }
