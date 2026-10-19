@@ -105,11 +105,24 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<CorrelationIdMiddleware>();
-if (app.Environment.IsDevelopment())
+
+// שגיאות בלי גוף (401/403 של JWT, 404 לכתובת לא קיימת) מקבלות את אותו פורמט JSON של שאר השגיאות
+app.UseStatusCodePages(async context =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    var response = context.HttpContext.Response;
+    var message = response.StatusCode switch
+    {
+        StatusCodes.Status401Unauthorized => "נדרשת התחברות",
+        StatusCodes.Status403Forbidden => "אין לך הרשאה לפעולה זו",
+        StatusCodes.Status404NotFound => "הכתובת לא נמצאה",
+        _ => "הבקשה נכשלה"
+    };
+    await response.WriteAsJsonAsync(new ErrorResponse(response.StatusCode, message));
+});
+
+// Swagger פעיל בכל סביבה, כדי שאפשר יהיה לבדוק את השרת גם ב-Render
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
