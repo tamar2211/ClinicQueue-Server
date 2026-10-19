@@ -1,0 +1,8 @@
+**/bin
+**/obj
+.vs
+.git
+.claude
+ClinicQueue.Client
+ClinicQueue.Tests
+docs
