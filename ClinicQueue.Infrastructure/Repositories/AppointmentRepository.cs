@@ -54,8 +54,13 @@ public class AppointmentRepository : IAppointmentRepository
     {
         appointments = appointments.AsNoTracking();
         var totalCount = await appointments.CountAsync(ct);
+        var now = DateTime.UtcNow;
+        // קודם תורים פעילים שעוד לא הגיעו (הקרוב ראשון), אחריהם ההיסטוריה (החדש ראשון)
         var items = await appointments
-            .OrderByDescending(a => a.CreatedAtUtc)
+            .OrderBy(a => a.Status == AppointmentStatus.Active && a.DoctorSlot.StartTimeUtc > now ? 0 : 1)
+            .ThenBy(a => a.Status == AppointmentStatus.Active && a.DoctorSlot.StartTimeUtc > now
+                ? a.DoctorSlot.StartTimeUtc : DateTime.MaxValue)
+            .ThenByDescending(a => a.DoctorSlot.StartTimeUtc)
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
             .ProjectTo<AppointmentDetailsResponse>(_mapper.ConfigurationProvider)
