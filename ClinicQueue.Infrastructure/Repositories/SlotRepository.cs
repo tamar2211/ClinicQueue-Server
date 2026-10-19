@@ -1,30 +1,24 @@
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using ClinicQueue.Application.DTOs.Common;
 using ClinicQueue.Application.DTOs.Slots;
 using ClinicQueue.Application.Interfaces;
 using ClinicQueue.Domain.Entities;
 using ClinicQueue.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace ClinicQueue.Infrastructure.Repositories;
 
 public class SlotRepository : ISlotRepository
 {
     private readonly AppDbContext _context;
+    private readonly IMapper _mapper;
 
-    public SlotRepository(AppDbContext context) => _context = context;
-
-    // הקרנה אחת לשימוש בחיפוש ובשליפה לפי מזהה
-    private static readonly Expression<Func<DoctorSlot, DoctorSlotDetailsResponse>> ToDetails = s =>
-        new DoctorSlotDetailsResponse
-        {
-            Id = s.Id,
-            DoctorId = s.DoctorId,
-            DoctorName = s.Doctor.FullName,
-            StartTimeUtc = s.StartTimeUtc,
-            EndTimeUtc = s.EndTimeUtc,
-            IsBooked = s.IsBooked
-        };
+    public SlotRepository(AppDbContext context, IMapper mapper)
+    {
+        _context = context;
+        _mapper = mapper;
+    }
 
     public async Task<PagedResponse<DoctorSlotDetailsResponse>> SearchAsync(
         SlotQueryParameters query, DateTime? fromUtc, DateTime? toUtc, CancellationToken ct)
@@ -50,7 +44,7 @@ public class SlotRepository : ISlotRepository
             .OrderBy(s => s.StartTimeUtc)
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
-            .Select(ToDetails)
+            .ProjectTo<DoctorSlotDetailsResponse>(_mapper.ConfigurationProvider)
             .ToListAsync(ct);
 
         return new PagedResponse<DoctorSlotDetailsResponse>
@@ -63,7 +57,8 @@ public class SlotRepository : ISlotRepository
     }
 
     public Task<DoctorSlotDetailsResponse?> GetDetailsByIdAsync(int id, CancellationToken ct) =>
-        _context.DoctorSlots.AsNoTracking().Where(s => s.Id == id).Select(ToDetails).FirstOrDefaultAsync(ct);
+        _context.DoctorSlots.AsNoTracking().Where(s => s.Id == id)
+            .ProjectTo<DoctorSlotDetailsResponse>(_mapper.ConfigurationProvider).FirstOrDefaultAsync(ct);
 
     public Task<DoctorSlot?> GetByIdAsync(int id, CancellationToken ct) =>
         _context.DoctorSlots.FirstOrDefaultAsync(s => s.Id == id, ct);

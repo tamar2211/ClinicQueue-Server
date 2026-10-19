@@ -1,3 +1,5 @@
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using ClinicQueue.Application.DTOs.Doctors;
 using ClinicQueue.Application.Interfaces;
 using ClinicQueue.Domain.Entities;
@@ -9,8 +11,13 @@ namespace ClinicQueue.Infrastructure.Repositories;
 public class DoctorRepository : IDoctorRepository
 {
     private readonly AppDbContext _context;
+    private readonly IMapper _mapper;
 
-    public DoctorRepository(AppDbContext context) => _context = context;
+    public DoctorRepository(AppDbContext context, IMapper mapper)
+    {
+        _context = context;
+        _mapper = mapper;
+    }
 
     public Task<List<DoctorDetailsResponse>> GetAllDetailsAsync(CancellationToken ct) =>
         DetailsQuery().OrderBy(d => d.FullName).ToListAsync(ct);
@@ -29,19 +36,8 @@ public class DoctorRepository : IDoctorRepository
 
     public void Remove(Doctor doctor) => _context.Doctors.Remove(doctor);
 
-    // הקרנה לתוך ה-DB: שאילתה אחת עם התמחויות וספירת משבצות פנויות (בלי N+1)
-    private IQueryable<DoctorDetailsResponse> DetailsQuery()
-    {
-        var now = DateTime.UtcNow;
-        return _context.Doctors.AsNoTracking().Select(d => new DoctorDetailsResponse
-        {
-            Id = d.Id,
-            FullName = d.FullName,
-            IsActive = d.IsActive,
-            Specializations = d.Specializations
-                .Select(s => new SpecializationDetailsResponse { Id = s.Id, Name = s.Name })
-                .ToList(),
-            AvailableSlotsCount = d.Slots.Count(s => !s.IsBooked && s.StartTimeUtc > now)
-        });
-    }
+    // ProjectTo לפי MappingProfile: שאילתה אחת עם התמחויות וספירת משבצות פנויות (בלי N+1)
+    private IQueryable<DoctorDetailsResponse> DetailsQuery() =>
+        _context.Doctors.AsNoTracking()
+            .ProjectTo<DoctorDetailsResponse>(_mapper.ConfigurationProvider, new { now = DateTime.UtcNow });
 }
